@@ -31,42 +31,21 @@ module pi_controller#(
     output reg signed [23:0] control_signal
 );
 
-reg signed [11:0] error;
-reg signed [11:0] kp_constant;
-reg signed [11:0] ki_constant;
+wire signed [11:0] error       = reference - feedback;
+wire signed [11:0] kp_constant = (error > 12'sd500 || error < -12'sd500) ? 12'sd128 : 12'sd32;
+wire signed [11:0] ki_constant = (error > 12'sd500 || error < -12'sd500) ? 12'sd4   : 12'sd1;
+wire signed [23:0] p           = error * kp_constant;
+wire signed [23:0] delta_i     = error * ki_constant;
 reg signed [23:0] accumulator;
-reg signed [23:0] p;
-reg signed [23:0] delta_i;
-reg signed [24:0] control_sum;
+wire signed [24:0] control_sum = accumulator + p;
+
+
+
 
 always @(posedge clk) begin
     if (reset) begin
-        error          <= 12'sd0;
-        kp_constant    <= 12'sd64;
-        ki_constant    <= 12'sd2;
-        control_signal <= 24'sd0;
-        accumulator    <= 24'sd0;
-        p              <= 24'sd0;
-        delta_i        <= 24'sd0;
-    end else begin
-        // Error signal
-        error <= reference - feedback;
-
-        // K_p and K_i coefficients must be calculated one clock cycle before P and I calculation.
-        if (error > 12'sd500 || error < -12'sd500) begin
-            kp_constant <= 12'sd128; 
-            ki_constant <= 12'sd4;
-        end else begin
-            kp_constant <= 12'sd32;  
-            ki_constant <= 12'sd1;
-        end
-
-        // P and Delta I calculations
-        p <= error * kp_constant;
-        delta_i <= error * ki_constant;
-        
-        control_sum <= accumulator + p;
-
+       accumulator    <= 24'sd0; end
+    else begin
         // Output
         if (control_sum > MAX_OUTPUT) begin
                 control_signal <= MAX_OUTPUT;
