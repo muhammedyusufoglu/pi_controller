@@ -1,4 +1,4 @@
-# Dynamic Gain-Scheduling PI Controller (Verilog)
+# Dynamic Gain-Scheduling PI Controller
 
 This repository contains a synthesizable Verilog implementation of a signed
 Proportional-Integral (PI) controller with dynamic gain-scheduling and
@@ -120,12 +120,9 @@ $$
 f_{clk}=\frac{1}{T_{clk}}=125\ MHz
 $$
 
-The output limits are configurable through Verilog parameters:
+The output limits are configurable through the following parameters:
 
 ```verilog
 parameter signed [23:0] MAX_OUTPUT = 24'sh7FFFFF;
 parameter signed [23:0] MIN_OUTPUT = 24'sh800000;
 ```
-
-The design can be synthesized and implemented on FPGA devices using standard
-RTL synthesis and static timing analysis.
